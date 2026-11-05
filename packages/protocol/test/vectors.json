@@ -1,0 +1,465 @@
+{
+  "version": "dzp.vectors.v1",
+  "note": "TEST KEYS ONLY. Derived from the public labels \"dzp-test-key:<label>\"; never use them for real funds.",
+  "keys": [
+    {
+      "label": "settler",
+      "priv": "4017c676d2cda1be3cbe8f8982419a9ee9f1afdb5611c943a43d1b43bbbf6ad5",
+      "pub": "038ade8c3f35d9f617a435e76f2958bbd4c8653d486edd13a96bacef1d0cc805dc",
+      "verifierId": "9196fd916748f68d"
+    },
+    {
+      "label": "cosigner",
+      "priv": "96d3325e186a354937fab92e59eb04c2a9f3a23fab832324ac10e33b4176f7fe",
+      "pub": "03fcfb5e774310a226bda5843e2110e430cfb2c5e2b738f7a0f15fb9cba0480911",
+      "verifierId": "f79582c0df00edaa"
+    },
+    {
+      "label": "customer",
+      "priv": "2f4ed06d925c191fa84286c46f73463369fd59ce2a427f6176f2bc0fd5c76dc3",
+      "pub": "03a4b5917426bd1de71b5cab022f286c4c6b9ce113be579bce7fabaac623228706",
+      "verifierId": "4cb0425ffca00ade"
+    },
+    {
+      "label": "chai",
+      "priv": "b17ead03162745a3147dba04f061fb5e1e6925f91abf0a22c893c18431091e66",
+      "pub": "022796d9ae4967a381cbe69b0168318e2016160ef3c716cf71df6248af4b5f4778",
+      "verifierId": "7975956f18cf330e"
+    },
+    {
+      "label": "grocery",
+      "priv": "ce59b006a515e6e6481dd77ad70dcd38ad61179712d164786570da40de116c55",
+      "pub": "02a14dddead829a840e8996a277249450a525ff0cba7854b9b26bea938e508498e",
+      "verifierId": "ea73939553457fb6"
+    },
+    {
+      "label": "veg",
+      "priv": "e3ad97464379d9eaecbd02cd7fe4ba39566a1ffe8fca87edc4c7aa4c55e0f37a",
+      "pub": "02ad16ba07fa4c88d86fabf54fb25d97642e18650bb36c9fbdad1c0367e57db20a",
+      "verifierId": "9f066cad1d6440d3"
+    }
+  ],
+  "canon": [
+    {
+      "name": "key order and nesting",
+      "value": {
+        "b": 1,
+        "a": [
+          {
+            "d": 2,
+            "c": "x"
+          }
+        ],
+        "c": {
+          "z": null,
+          "y": true
+        }
+      },
+      "canon": "{\"a\":[{\"c\":\"x\",\"d\":2}],\"b\":1,\"c\":{\"y\":true,\"z\":null}}",
+      "hash": "3a98c31990a2c1e9c771522188e7e572070ed736f1d14aea5cb3574fb1c0f37a"
+    },
+    {
+      "name": "unicode and escapes",
+      "value": {
+        "memo": "chai \"masala\" ₹ naïve 😀\n\t"
+      },
+      "canon": "{\"memo\":\"chai \\\"masala\\\" ₹ naïve 😀\\n\\t\"}",
+      "hash": "8c4400bb7a496ad20cf0e6003a2c2b5bcbf5046926c7785fdfe96043e83867f9"
+    },
+    {
+      "name": "integers",
+      "value": {
+        "zero": 0,
+        "neg": -1,
+        "max": 9007199254740991
+      },
+      "canon": "{\"max\":9007199254740991,\"neg\":-1,\"zero\":0}",
+      "hash": "14e379f415322b2f353e3ff1f76ccac482f73d56f76a207b1e32580555a3b3ce"
+    },
+    {
+      "name": "empty object and array",
+      "value": {
+        "a": {},
+        "b": []
+      },
+      "canon": "{\"a\":{},\"b\":[]}",
+      "hash": "aeeba1e56a144077f89e26c930dad7cf933e9383cfb8e33ddff618233b29be76"
+    },
+    {
+      "name": "verifier id preimage",
+      "value": {
+        "type": "VERIFIER_ID",
+        "pub": "03a4b5917426bd1de71b5cab022f286c4c6b9ce113be579bce7fabaac623228706"
+      },
+      "canon": "{\"pub\":\"03a4b5917426bd1de71b5cab022f286c4c6b9ce113be579bce7fabaac623228706\",\"type\":\"VERIFIER_ID\"}",
+      "hash": "4cb0425ffca00adecc0eba5b79ca05a884191c88704bca4805736791e625a14f"
+    },
+    {
+      "name": "genesis note id",
+      "value": {
+        "type": "GENESIS",
+        "certHash": "1dc0ef34bff2de779aced46ff4bcc4f9a777ab0990a2afb8f7658228e17e95fd"
+      },
+      "canon": "{\"certHash\":\"1dc0ef34bff2de779aced46ff4bcc4f9a777ab0990a2afb8f7658228e17e95fd\",\"type\":\"GENESIS\"}",
+      "hash": "b2c52658edeade7ade6c298e3942880fc8ca58f2a21a2810571ebf4eb71847a3"
+    },
+    {
+      "name": "output note id 0",
+      "value": {
+        "type": "NOTE",
+        "spendHash": "6852280d2558165b4890bef4dd85631e8afb3f6f89d38e49dec8906a2082b276",
+        "index": 0
+      },
+      "canon": "{\"index\":0,\"spendHash\":\"6852280d2558165b4890bef4dd85631e8afb3f6f89d38e49dec8906a2082b276\",\"type\":\"NOTE\"}",
+      "hash": "33e13244192878b2b6bdd0c82f675b6eb29c4320f360a150869636b2b202ecb1"
+    },
+    {
+      "name": "output note id 1",
+      "value": {
+        "type": "NOTE",
+        "spendHash": "6852280d2558165b4890bef4dd85631e8afb3f6f89d38e49dec8906a2082b276",
+        "index": 1
+      },
+      "canon": "{\"index\":1,\"spendHash\":\"6852280d2558165b4890bef4dd85631e8afb3f6f89d38e49dec8906a2082b276\",\"type\":\"NOTE\"}",
+      "hash": "26f3aa874c2558ddf41c2012d04c623f97162cea256de62f8a9feeee17f42e3a"
+    }
+  ],
+  "signatures": [
+    {
+      "name": "roster (settler)",
+      "signer": "settler",
+      "object": {
+        "version": "dzp.roster.v1",
+        "marketId": "dzp-market-1",
+        "epoch": 1,
+        "threshold": 3,
+        "verifiers": [
+          {
+            "id": "4cb0425ffca00ade",
+            "pub": "03a4b5917426bd1de71b5cab022f286c4c6b9ce113be579bce7fabaac623228706"
+          },
+          {
+            "id": "7975956f18cf330e",
+            "pub": "022796d9ae4967a381cbe69b0168318e2016160ef3c716cf71df6248af4b5f4778"
+          },
+          {
+            "id": "ea73939553457fb6",
+            "pub": "02a14dddead829a840e8996a277249450a525ff0cba7854b9b26bea938e508498e"
+          },
+          {
+            "id": "9f066cad1d6440d3",
+            "pub": "02ad16ba07fa4c88d86fabf54fb25d97642e18650bb36c9fbdad1c0367e57db20a"
+          }
+        ],
+        "participants": [
+          {
+            "pub": "03a4b5917426bd1de71b5cab022f286c4c6b9ce113be579bce7fabaac623228706",
+            "name": "Customer",
+            "hederaAccount": "0.0.1001"
+          },
+          {
+            "pub": "022796d9ae4967a381cbe69b0168318e2016160ef3c716cf71df6248af4b5f4778",
+            "name": "Chai stall",
+            "hederaAccount": "0.0.1002"
+          },
+          {
+            "pub": "02a14dddead829a840e8996a277249450a525ff0cba7854b9b26bea938e508498e",
+            "name": "Grocery",
+            "hederaAccount": "0.0.1003"
+          },
+          {
+            "pub": "02ad16ba07fa4c88d86fabf54fb25d97642e18650bb36c9fbdad1c0367e57db20a",
+            "name": "Vegetable stall",
+            "hederaAccount": "0.0.1004"
+          }
+        ],
+        "sigs": {
+          "settler": "d4a588fca0c625508a74945cf6cfd0c909a1023c190da5c01bca02c834eb67597b1e52da474b65781bf7220fb9fad23f03426fbeea654afb340b231f389f6223",
+          "cosigner": "5bb30f4f0d5cb083c6936fc5a7f3ccb3797e9c0591ee32d562d8c7e535ab0f3b0844761ff127655e0463a34f569a60ba9afecad5617f38d054c20826f4e1c571"
+        }
+      },
+      "signingHash": "7b757d599f592568079d1de93134bdeb82efc52f79da40a2492c250a47547717",
+      "sig": "d4a588fca0c625508a74945cf6cfd0c909a1023c190da5c01bca02c834eb67597b1e52da474b65781bf7220fb9fad23f03426fbeea654afb340b231f389f6223"
+    },
+    {
+      "name": "roster (cosigner)",
+      "signer": "cosigner",
+      "object": {
+        "version": "dzp.roster.v1",
+        "marketId": "dzp-market-1",
+        "epoch": 1,
+        "threshold": 3,
+        "verifiers": [
+          {
+            "id": "4cb0425ffca00ade",
+            "pub": "03a4b5917426bd1de71b5cab022f286c4c6b9ce113be579bce7fabaac623228706"
+          },
+          {
+            "id": "7975956f18cf330e",
+            "pub": "022796d9ae4967a381cbe69b0168318e2016160ef3c716cf71df6248af4b5f4778"
+          },
+          {
+            "id": "ea73939553457fb6",
+            "pub": "02a14dddead829a840e8996a277249450a525ff0cba7854b9b26bea938e508498e"
+          },
+          {
+            "id": "9f066cad1d6440d3",
+            "pub": "02ad16ba07fa4c88d86fabf54fb25d97642e18650bb36c9fbdad1c0367e57db20a"
+          }
+        ],
+        "participants": [
+          {
+            "pub": "03a4b5917426bd1de71b5cab022f286c4c6b9ce113be579bce7fabaac623228706",
+            "name": "Customer",
+            "hederaAccount": "0.0.1001"
+          },
+          {
+            "pub": "022796d9ae4967a381cbe69b0168318e2016160ef3c716cf71df6248af4b5f4778",
+            "name": "Chai stall",
+            "hederaAccount": "0.0.1002"
+          },
+          {
+            "pub": "02a14dddead829a840e8996a277249450a525ff0cba7854b9b26bea938e508498e",
+            "name": "Grocery",
+            "hederaAccount": "0.0.1003"
+          },
+          {
+            "pub": "02ad16ba07fa4c88d86fabf54fb25d97642e18650bb36c9fbdad1c0367e57db20a",
+            "name": "Vegetable stall",
+            "hederaAccount": "0.0.1004"
+          }
+        ],
+        "sigs": {
+          "settler": "d4a588fca0c625508a74945cf6cfd0c909a1023c190da5c01bca02c834eb67597b1e52da474b65781bf7220fb9fad23f03426fbeea654afb340b231f389f6223",
+          "cosigner": "5bb30f4f0d5cb083c6936fc5a7f3ccb3797e9c0591ee32d562d8c7e535ab0f3b0844761ff127655e0463a34f569a60ba9afecad5617f38d054c20826f4e1c571"
+        }
+      },
+      "signingHash": "7b757d599f592568079d1de93134bdeb82efc52f79da40a2492c250a47547717",
+      "sig": "5bb30f4f0d5cb083c6936fc5a7f3ccb3797e9c0591ee32d562d8c7e535ab0f3b0844761ff127655e0463a34f569a60ba9afecad5617f38d054c20826f4e1c571"
+    },
+    {
+      "name": "reserve certificate (settler)",
+      "signer": "settler",
+      "object": {
+        "version": "dzp.reserve.v1",
+        "reserveId": "reserve-0001",
+        "hederaAccount": "0.0.2001",
+        "amount": "500000000",
+        "ownerPub": "03a4b5917426bd1de71b5cab022f286c4c6b9ce113be579bce7fabaac623228706",
+        "marketId": "dzp-market-1",
+        "rosterHash": "7b757d599f592568079d1de93134bdeb82efc52f79da40a2492c250a47547717",
+        "issuedAt": 1793000000,
+        "expiresAt": 1793086400,
+        "sigs": {
+          "settler": "5a0a706f1d54f5d495c54b982cbc3d476f00ebd59fa36f3987a17fd77f43381924118d2b127b73f9cd29f24f06c91510de352580ffa3ee00fb4176bca328992d",
+          "cosigner": "f9a00ebda0e2d49f1e3b1bafc57c5da3fad5c3a16321557aeb5a13daab5192cc38685f72e5f1da1f2c827c531e2622221fb8548c9035a97a47d836111efc7bc5"
+        }
+      },
+      "signingHash": "1dc0ef34bff2de779aced46ff4bcc4f9a777ab0990a2afb8f7658228e17e95fd",
+      "sig": "5a0a706f1d54f5d495c54b982cbc3d476f00ebd59fa36f3987a17fd77f43381924118d2b127b73f9cd29f24f06c91510de352580ffa3ee00fb4176bca328992d"
+    },
+    {
+      "name": "reserve certificate (cosigner)",
+      "signer": "cosigner",
+      "object": {
+        "version": "dzp.reserve.v1",
+        "reserveId": "reserve-0001",
+        "hederaAccount": "0.0.2001",
+        "amount": "500000000",
+        "ownerPub": "03a4b5917426bd1de71b5cab022f286c4c6b9ce113be579bce7fabaac623228706",
+        "marketId": "dzp-market-1",
+        "rosterHash": "7b757d599f592568079d1de93134bdeb82efc52f79da40a2492c250a47547717",
+        "issuedAt": 1793000000,
+        "expiresAt": 1793086400,
+        "sigs": {
+          "settler": "5a0a706f1d54f5d495c54b982cbc3d476f00ebd59fa36f3987a17fd77f43381924118d2b127b73f9cd29f24f06c91510de352580ffa3ee00fb4176bca328992d",
+          "cosigner": "f9a00ebda0e2d49f1e3b1bafc57c5da3fad5c3a16321557aeb5a13daab5192cc38685f72e5f1da1f2c827c531e2622221fb8548c9035a97a47d836111efc7bc5"
+        }
+      },
+      "signingHash": "1dc0ef34bff2de779aced46ff4bcc4f9a777ab0990a2afb8f7658228e17e95fd",
+      "sig": "f9a00ebda0e2d49f1e3b1bafc57c5da3fad5c3a16321557aeb5a13daab5192cc38685f72e5f1da1f2c827c531e2622221fb8548c9035a97a47d836111efc7bc5"
+    },
+    {
+      "name": "spend",
+      "signer": "customer",
+      "object": {
+        "version": "dzp.spend.v1",
+        "reserveId": "reserve-0001",
+        "marketId": "dzp-market-1",
+        "inputs": [
+          "b2c52658edeade7ade6c298e3942880fc8ca58f2a21a2810571ebf4eb71847a3"
+        ],
+        "outputs": [
+          {
+            "owner": "022796d9ae4967a381cbe69b0168318e2016160ef3c716cf71df6248af4b5f4778",
+            "amount": "300000000"
+          },
+          {
+            "owner": "03a4b5917426bd1de71b5cab022f286c4c6b9ce113be579bce7fabaac623228706",
+            "amount": "200000000"
+          }
+        ],
+        "memo": "chai",
+        "createdAt": 1793000600,
+        "sig": "559937780cb1b06b88ab0b146f2a0bfaaa8706f7aef6ce0fdbcdc02a2282dee337373d0ebfa8835833a06ccd137d66af94412b82bc3488fd74dbafa1bc3befd2"
+      },
+      "signingHash": "6852280d2558165b4890bef4dd85631e8afb3f6f89d38e49dec8906a2082b276",
+      "sig": "559937780cb1b06b88ab0b146f2a0bfaaa8706f7aef6ce0fdbcdc02a2282dee337373d0ebfa8835833a06ccd137d66af94412b82bc3488fd74dbafa1bc3befd2"
+    },
+    {
+      "name": "vote",
+      "signer": "chai",
+      "object": {
+        "type": "VOTE",
+        "spendHash": "6852280d2558165b4890bef4dd85631e8afb3f6f89d38e49dec8906a2082b276",
+        "marketId": "dzp-market-1",
+        "epoch": 1,
+        "verifierId": "7975956f18cf330e",
+        "sig": "ed7d1205543191e3e81c525f6a5363a751dc4cf27479718b4efaad8dab5621e916ee54484850e2a220d140839d6f47f8098d369a8b03a0a3505b0b0dd083bef8"
+      },
+      "signingHash": "46914d45b23a4df04493f29faecc632b75a1efcfdadd7670713bbbb925dd6e14",
+      "sig": "ed7d1205543191e3e81c525f6a5363a751dc4cf27479718b4efaad8dab5621e916ee54484850e2a220d140839d6f47f8098d369a8b03a0a3505b0b0dd083bef8"
+    },
+    {
+      "name": "invoice",
+      "signer": "chai",
+      "object": {
+        "type": "INVOICE",
+        "to": "022796d9ae4967a381cbe69b0168318e2016160ef3c716cf71df6248af4b5f4778",
+        "amount": "300000000",
+        "memo": "chai",
+        "createdAt": 1793000590,
+        "sig": "e999a842c752be6b74a47808f73a8879677b5c5cd2bb2c21ac3447859cfb324f3de8b099d910f2aa4d4044446545d05193468fbeba949be3c3aa65557034b707"
+      },
+      "signingHash": "33e46e1121ef6ae3355a2baab923fd68bfa1a27094188c2f24db07049f6788c3",
+      "sig": "e999a842c752be6b74a47808f73a8879677b5c5cd2bb2c21ac3447859cfb324f3de8b099d910f2aa4d4044446545d05193468fbeba949be3c3aa65557034b707"
+    },
+    {
+      "name": "hello",
+      "signer": "grocery",
+      "object": {
+        "type": "HELLO",
+        "verifierId": "ea73939553457fb6",
+        "pub": "02a14dddead829a840e8996a277249450a525ff0cba7854b9b26bea938e508498e",
+        "name": "Grocery",
+        "ts": 1793000060,
+        "sig": "7aef4f8deb7679d73017b4594727a75ed63f381e13cc621219a11fc978bf19c10881e80efa1a671ab5f3e7dba44f809b5552da408ed910716c658e035272a696"
+      },
+      "signingHash": "8f9d99a03f40b0576875a1661245a4cf81c1a45a43f6af52da55b1f6365366cf",
+      "sig": "7aef4f8deb7679d73017b4594727a75ed63f381e13cc621219a11fc978bf19c10881e80efa1a671ab5f3e7dba44f809b5552da408ed910716c658e035272a696"
+    },
+    {
+      "name": "refuse",
+      "signer": "veg",
+      "object": {
+        "type": "REFUSE",
+        "spendHash": "6852280d2558165b4890bef4dd85631e8afb3f6f89d38e49dec8906a2082b276",
+        "verifierId": "9f066cad1d6440d3",
+        "reason": "note already spent",
+        "sig": "394dfc312f458a69ed85e15ddb7de191943de08d53293377523fbb1453508b657f103e1b67b58093da49d2ce00674bc002b4e8664324d0d3eaccc2be51ef516d"
+      },
+      "signingHash": "05ac985fa9849e954db129d82dd6c26b8cdd601c8d52cbbbcd28462cb39f27d9",
+      "sig": "394dfc312f458a69ed85e15ddb7de191943de08d53293377523fbb1453508b657f103e1b67b58093da49d2ce00674bc002b4e8664324d0d3eaccc2be51ef516d"
+    },
+    {
+      "name": "close request",
+      "signer": "settler",
+      "object": {
+        "type": "CLOSE_REQUEST",
+        "reserveId": "reserve-0001",
+        "marketId": "dzp-market-1",
+        "requestedAt": 1793007200,
+        "sig": "d069c08a15ca532db7610a3b26c6512975522c99c9fe1509f2693607eeb4bf553fb36a12df210efff5d4a346c47f6f4cf36433a51bfc8d8d0673debea126aaf3"
+      },
+      "signingHash": "6566bda11d2deffb17c69e8bfb5c4473c1886a5f94125c01d4c6b6e88db6cf42",
+      "sig": "d069c08a15ca532db7610a3b26c6512975522c99c9fe1509f2693607eeb4bf553fb36a12df210efff5d4a346c47f6f4cf36433a51bfc8d8d0673debea126aaf3"
+    },
+    {
+      "name": "close attestation",
+      "signer": "veg",
+      "object": {
+        "type": "CLOSED",
+        "reserveId": "reserve-0001",
+        "verifierId": "9f066cad1d6440d3",
+        "locks": [
+          {
+            "noteId": "b2c52658edeade7ade6c298e3942880fc8ca58f2a21a2810571ebf4eb71847a3",
+            "spendHash": "6852280d2558165b4890bef4dd85631e8afb3f6f89d38e49dec8906a2082b276"
+          }
+        ],
+        "spends": [
+          {
+            "version": "dzp.spend.v1",
+            "reserveId": "reserve-0001",
+            "marketId": "dzp-market-1",
+            "inputs": [
+              "b2c52658edeade7ade6c298e3942880fc8ca58f2a21a2810571ebf4eb71847a3"
+            ],
+            "outputs": [
+              {
+                "owner": "022796d9ae4967a381cbe69b0168318e2016160ef3c716cf71df6248af4b5f4778",
+                "amount": "300000000"
+              },
+              {
+                "owner": "03a4b5917426bd1de71b5cab022f286c4c6b9ce113be579bce7fabaac623228706",
+                "amount": "200000000"
+              }
+            ],
+            "memo": "chai",
+            "createdAt": 1793000600,
+            "sig": "559937780cb1b06b88ab0b146f2a0bfaaa8706f7aef6ce0fdbcdc02a2282dee337373d0ebfa8835833a06ccd137d66af94412b82bc3488fd74dbafa1bc3befd2"
+          }
+        ],
+        "sig": "b0c4e7a07689754d047347e12c66eaa46b1f260bf1f643ec11ba9d1f20dee1a365983f441953aa7e6b819ef600e30118fddd03c0bd1e2c3c61a1eb044f9d8158"
+      },
+      "signingHash": "53dd44ad475d676c9014ef5451ae9d4ee5ac86e56d6e2bc009dd0185b9f41d3a",
+      "sig": "b0c4e7a07689754d047347e12c66eaa46b1f260bf1f643ec11ba9d1f20dee1a365983f441953aa7e6b819ef600e30118fddd03c0bd1e2c3c61a1eb044f9d8158"
+    }
+  ],
+  "hbar": [
+    {
+      "hbar": "5",
+      "tinybar": "500000000"
+    },
+    {
+      "hbar": "3",
+      "tinybar": "300000000"
+    },
+    {
+      "hbar": "2",
+      "tinybar": "200000000"
+    },
+    {
+      "hbar": "1.5",
+      "tinybar": "150000000"
+    },
+    {
+      "hbar": "1",
+      "tinybar": "100000000"
+    },
+    {
+      "hbar": "0.5",
+      "tinybar": "50000000"
+    },
+    {
+      "hbar": "0.3",
+      "tinybar": "30000000"
+    },
+    {
+      "hbar": "0.2",
+      "tinybar": "20000000"
+    },
+    {
+      "hbar": "2.2",
+      "tinybar": "220000000"
+    },
+    {
+      "hbar": "2.5",
+      "tinybar": "250000000"
+    },
+    {
+      "hbar": "0.00000001",
+      "tinybar": "1"
+    }
+  ]
+}
