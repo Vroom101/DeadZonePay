@@ -1,1 +1,27 @@
+# dependencies and build output
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# secrets and local data: never commit (each app commits a .env.example)
+.env
+.env.*
+!.env.example
+data/
+
+# Expo / React Native local state
+.expo/
+.expo-shared/
+
+# fallback copy of the protocol made by the sync-protocol script
+apps/mobile/src/core/protocol/
+
+# harness scratch output (REPORT.md itself is committed)
+packages/protocol/harness/out/
+
+# tool and editor noise
 .remember/
+.DS_Store
+Thumbs.db
+*.log

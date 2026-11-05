@@ -1,0 +1,4 @@
+# LF everywhere so hashes of committed fixtures (test/vectors.json) match on every OS
+* text=auto eol=lf
+*.png binary
+*.jpg binary
