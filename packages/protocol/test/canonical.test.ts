@@ -42,8 +42,8 @@ describe('canon: accepted values', () => {
     expect(canon({ memo: s })).toBe(`{"memo":${JSON.stringify(s)}}`);
   });
 
-  it('escapes a lone surrogate instead of producing invalid UTF-8', () => {
-    expect(canon('\ud800')).toBe('"\\ud800"');
+  it('accepts properly paired surrogates (emoji)', () => {
+    expect(canon('😀')).toBe('"😀"');
   });
 
   it('accepts null-prototype objects', () => {
@@ -84,6 +84,15 @@ describe('canon: rejected values', () => {
     // eslint-disable-next-line no-sparse-arrays
     ['sparse array', [1, , 3]],
     ['symbol key', { [Symbol('k')]: 1 }],
+    ['lone high surrogate', 'a\ud800b'],
+    ['lone low surrogate', '\udc00'],
+    ['high surrogate at end', 'x\ud83d'],
+    ['reversed surrogate pair', '\ude00\ud83d'],
+    ['lone surrogate in a key', { '\ud800': 1 }],
+    ['getter', { get x() { return 1; } }],
+    ['array index getter', Object.defineProperty([0], '0', { get: () => 2, enumerable: true })],
+    ['array with extra property', Object.assign([1], { amount: '5' })],
+    ['non-enumerable property', Object.defineProperty({}, 'amount', { value: '1', enumerable: false })],
   ];
 
   for (const [name, value] of rejects) {

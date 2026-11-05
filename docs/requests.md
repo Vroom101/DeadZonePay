@@ -21,5 +21,8 @@ Changes P2 needs in files P2 does not own. Each item names the owner, what is ne
 - [ ] **`GET /roster` also returns `settlerPub` and `cosignerPub`** (compressed P-256 hex). Phones need them to verify the roster and certificates offline.
 - [ ] **Roster verifier ids are derived:** `id = hash({type:'VERIFIER_ID', pub}).slice(0, 16)`. Phones reject a roster whose ids don't match. Use `verifierIdFromPub(pub)` from the package.
 - [ ] **Threshold rule:** phones accept a roster only if `2 * threshold - verifiers.length >= 2`. That gives 3 of 4, or 3 of 3 as the fallback; 2 of 4 is rejected.
-- [ ] **Close request shape** (signed by the settler key): `{ type: 'CLOSE_REQUEST', reserveId, marketId, requestedAt, sig }`, served from `GET /closes`.
+- [ ] **Close request shape** (signed by the settler key): `{ type: 'CLOSE_REQUEST', reserveId, marketId, certHash, requestedAt, sig }`, served from `GET /closes`.
+- [ ] **Never re-issue a certificate for an existing `reserveId`** (not even to extend `expiresAt`). Phones pin the first certificate per reserve and refuse any other; a longer validity means a new reserve.
+- [ ] **A new roster for the same market must bump `epoch`.**
+- [ ] **Cosigner signs only the Hedera scheduled transfer** (after recomputing `settlementPlan` and matching `planHash`), never an app-level plan object.
 - [ ] **Signatures are over the hash of the object without its `sig` / `sigs` field.** Settler and cosigner both sign the same payload: the roster or certificate minus `sigs`.

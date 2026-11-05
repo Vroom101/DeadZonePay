@@ -14,6 +14,18 @@ A running log of decisions and open questions. The newest entries go at the bott
 - **INVOICE, REFUSE and HELLO are signed.** An unsigned invoice could swap the receiver's key and redirect a payment. A signed refusal lets the panel name the refusing phone truthfully.
 - **No "not yet valid" check on certificates.** Only expiry is checked, by the phone's clock. A phone whose clock runs a few minutes behind must not refuse a fresh certificate, and safety doesn't depend on `issuedAt`.
 
+- **Phase A review fixes (Opus critic, first verdict BLOCK, then PASS after fixes):**
+  - The genesis proof carries no certificate. The first note comes only from the signed request cert; the old shape let a payer mint money from a forged cert (CRITICAL).
+  - One certificate per reserveId, pinned in the same transaction as the locks (HIGH).
+  - CloseRequest and CloseAttestation bind `marketId` and `certHash`, so an attestation can't be replayed from another market (HIGH).
+  - Close is persist-before-reply.
+  - A note is held only if the attestation includes an owner-signed spend.
+  - Settlement checks for conflicting approvals across the whole uploaded set before applying any.
+  - `canon` rejects unpaired surrogates, getters, non-enumerable properties and arrays with extras.
+  - `checkVectors` fails on an incomplete file.
+  - HELLO and INVOICE carry `marketId`; INVOICE carries `invoiceId`.
+- **Carried into phase B:** validators must reject unknown or missing fields on every signed type (exact key sets). `canon` cannot catch that, because the signing payload ignores top-level `sig`/`sigs`.
+
 ## Open questions (for the phase A review with P1 and P3)
 
 - `threshold` is typed `number` with the rule `2t - n >= 2`, not the literal `3`, so a 3-of-3 roster works if the fourth phone is missing. OK?

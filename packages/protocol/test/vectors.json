@@ -325,28 +325,31 @@
       "signer": "chai",
       "object": {
         "type": "INVOICE",
+        "marketId": "dzp-market-1",
+        "invoiceId": "cccccccccccccccccccccccccccccccc",
         "to": "022796d9ae4967a381cbe69b0168318e2016160ef3c716cf71df6248af4b5f4778",
         "amount": "300000000",
         "memo": "chai",
         "createdAt": 1793000590,
-        "sig": "e999a842c752be6b74a47808f73a8879677b5c5cd2bb2c21ac3447859cfb324f3de8b099d910f2aa4d4044446545d05193468fbeba949be3c3aa65557034b707"
+        "sig": "c64b28fb47ed4f450e40a0602279a6b4be1acb210d1b7768fdc3ced7118d6438129c475f740d76c1405856415860e776b06bb465242e5d2a5c9dcf3f204c6879"
       },
-      "signingHash": "33e46e1121ef6ae3355a2baab923fd68bfa1a27094188c2f24db07049f6788c3",
-      "sig": "e999a842c752be6b74a47808f73a8879677b5c5cd2bb2c21ac3447859cfb324f3de8b099d910f2aa4d4044446545d05193468fbeba949be3c3aa65557034b707"
+      "signingHash": "72b3243daaa6183988c0669321ed32406ee7486f50a932ef6c748b27f2750492",
+      "sig": "c64b28fb47ed4f450e40a0602279a6b4be1acb210d1b7768fdc3ced7118d6438129c475f740d76c1405856415860e776b06bb465242e5d2a5c9dcf3f204c6879"
     },
     {
       "name": "hello",
       "signer": "grocery",
       "object": {
         "type": "HELLO",
+        "marketId": "dzp-market-1",
         "verifierId": "ea73939553457fb6",
         "pub": "02a14dddead829a840e8996a277249450a525ff0cba7854b9b26bea938e508498e",
         "name": "Grocery",
         "ts": 1793000060,
-        "sig": "7aef4f8deb7679d73017b4594727a75ed63f381e13cc621219a11fc978bf19c10881e80efa1a671ab5f3e7dba44f809b5552da408ed910716c658e035272a696"
+        "sig": "e60bd42ad8682ac79357100ea6a4b78b3e7197fdd7495e38620388d5012ddd137798fcdbb011c9b615eca781d4b253b78f8070aa2baac8e15c3c8d9278c985a4"
       },
-      "signingHash": "8f9d99a03f40b0576875a1661245a4cf81c1a45a43f6af52da55b1f6365366cf",
-      "sig": "7aef4f8deb7679d73017b4594727a75ed63f381e13cc621219a11fc978bf19c10881e80efa1a671ab5f3e7dba44f809b5552da408ed910716c658e035272a696"
+      "signingHash": "00d6d77f95d77d01bb7e842dc8f8c7c828874cefecb38f0f34291f564ea1a12c",
+      "sig": "e60bd42ad8682ac79357100ea6a4b78b3e7197fdd7495e38620388d5012ddd137798fcdbb011c9b615eca781d4b253b78f8070aa2baac8e15c3c8d9278c985a4"
     },
     {
       "name": "refuse",
@@ -368,11 +371,12 @@
         "type": "CLOSE_REQUEST",
         "reserveId": "reserve-0001",
         "marketId": "dzp-market-1",
+        "certHash": "1dc0ef34bff2de779aced46ff4bcc4f9a777ab0990a2afb8f7658228e17e95fd",
         "requestedAt": 1793007200,
-        "sig": "d069c08a15ca532db7610a3b26c6512975522c99c9fe1509f2693607eeb4bf553fb36a12df210efff5d4a346c47f6f4cf36433a51bfc8d8d0673debea126aaf3"
+        "sig": "5861403d00643635f7416c62b6fe96709187ef6ca9e98c45d488d35a0004150f403a9b7274ce0f46b985eb8db515557bcae1ffe095c1b8faf6394cc11b2c34aa"
       },
-      "signingHash": "6566bda11d2deffb17c69e8bfb5c4473c1886a5f94125c01d4c6b6e88db6cf42",
-      "sig": "d069c08a15ca532db7610a3b26c6512975522c99c9fe1509f2693607eeb4bf553fb36a12df210efff5d4a346c47f6f4cf36433a51bfc8d8d0673debea126aaf3"
+      "signingHash": "f3421e2b8c2526847475e6eb9d6b4e91eb9f8dceb6dff611a54709e1e03201af",
+      "sig": "5861403d00643635f7416c62b6fe96709187ef6ca9e98c45d488d35a0004150f403a9b7274ce0f46b985eb8db515557bcae1ffe095c1b8faf6394cc11b2c34aa"
     },
     {
       "name": "close attestation",
@@ -380,6 +384,8 @@
       "object": {
         "type": "CLOSED",
         "reserveId": "reserve-0001",
+        "marketId": "dzp-market-1",
+        "certHash": "1dc0ef34bff2de779aced46ff4bcc4f9a777ab0990a2afb8f7658228e17e95fd",
         "verifierId": "9f066cad1d6440d3",
         "locks": [
           {
@@ -410,10 +416,10 @@
             "sig": "559937780cb1b06b88ab0b146f2a0bfaaa8706f7aef6ce0fdbcdc02a2282dee337373d0ebfa8835833a06ccd137d66af94412b82bc3488fd74dbafa1bc3befd2"
           }
         ],
-        "sig": "b0c4e7a07689754d047347e12c66eaa46b1f260bf1f643ec11ba9d1f20dee1a365983f441953aa7e6b819ef600e30118fddd03c0bd1e2c3c61a1eb044f9d8158"
+        "sig": "03973e440170bd444a102c8c611d5b89e412956379edb91991b703388454a7122c88ee23f666ff204a3ef39a0e785e46e8d17e04a12e47aef637c997448c9def"
       },
-      "signingHash": "53dd44ad475d676c9014ef5451ae9d4ee5ac86e56d6e2bc009dd0185b9f41d3a",
-      "sig": "b0c4e7a07689754d047347e12c66eaa46b1f260bf1f643ec11ba9d1f20dee1a365983f441953aa7e6b819ef600e30118fddd03c0bd1e2c3c61a1eb044f9d8158"
+      "signingHash": "7ba1b517aded51813dce5e95caa551ddb18068e25bf893a39848b0ef341f5cd6",
+      "sig": "03973e440170bd444a102c8c611d5b89e412956379edb91991b703388454a7122c88ee23f666ff204a3ef39a0e785e46e8d17e04a12e47aef637c997448c9def"
     }
   ],
   "hbar": [

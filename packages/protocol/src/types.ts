@@ -61,7 +61,7 @@ export const LIMITS = {
   MAX_TINYBAR: 9_223_372_036_854_775_807n,
   /** Mesh: a message is forwarded at most once more after the first hop. */
   MESH_TTL: 2,
-  /** Mesh: serialized envelope must stay under the Nearby Connections bytes payload limit. */
+  /** Mesh: UTF-8 length of JSON.stringify(envelope) must be strictly less than this (Nearby bytes payload limit). */
   MAX_MESSAGE_BYTES: 32 * 1024,
   /** Mesh: number of recent msgIds each phone remembers for dedupe. */
   DEDUPE_WINDOW: 1000,
@@ -152,10 +152,13 @@ export interface Spend {
   sig: Sig;
 }
 
-/** Why an input note exists: it is the reserve's first note, or an output of an approved spend. */
-export type InputProof =
-  | { kind: 'genesis'; cert: ReserveCertificate }
-  | { kind: 'approval'; approval: Approval };
+/**
+ * Why an input note exists: it is the reserve's first note, or an output of an approved spend.
+ * A genesis proof carries no certificate of its own: the first note is always derived from the
+ * request's `cert`, the only certificate whose signatures rule 1 checks. (A certificate inside
+ * the proof would let a payer mint a note from an unsigned, forged certificate.)
+ */
+export type InputProof = { kind: 'genesis' } | { kind: 'approval'; approval: Approval };
 
 // ---------------------------------------------------------------------------
 // Acks and approvals
@@ -186,6 +189,8 @@ export interface CloseRequest {
   type: typeof TYPE.CLOSE_REQUEST;
   reserveId: string;
   marketId: string;
+  /** signingHash of the reserve's certificate: binds the close to one certificate. */
+  certHash: Hash;
   requestedAt: UnixSeconds;
   sig: Sig;
 }
@@ -195,10 +200,17 @@ export interface Lock {
   spendHash: Hash;
 }
 
-/** A phone's signed list of every lock it holds for one reserve. After signing it, the phone never acks that reserve again. */
+/**
+ * A phone's signed list of every lock it holds for one reserve. The phone persists `closed`
+ * and this lock snapshot in one transaction BEFORE signing; after that it never acks the
+ * reserve again. Settlement ignores attestations whose marketId or certHash differ.
+ */
 export interface CloseAttestation {
   type: typeof TYPE.CLOSED;
   reserveId: string;
+  marketId: string;
+  /** signingHash of the reserve's certificate (stops replay of an attestation from another market or certificate). */
+  certHash: Hash;
   verifierId: VerifierId;
   locks: Lock[];
   /** The full spends the locks point to, so the backend can check the owner's signature. */
@@ -217,7 +229,8 @@ export interface HeldNote {
 }
 
 /**
- * Who gets paid from a reserve. payouts sorted by hederaAccount, held sorted by noteId.
+ * Who gets paid from a reserve. payouts: sorted by hederaAccount, one entry per account, no zero
+ * amounts. held: sorted by noteId.
  * sum(payouts) + sum(held) == cert.amount.
  * planHash = hash({type:'SETTLEMENT_PLAN', reserveId, payouts, held}).
  */
@@ -235,6 +248,7 @@ export interface SettlementPlan {
 /** Signed by the phone on connect. Peers disconnect a phone whose pub is not a roster verifier. */
 export interface Hello {
   type: typeof TYPE.HELLO;
+  marketId: string;
   verifierId: VerifierId;
   pub: PubKey;
   name: string;
@@ -245,6 +259,9 @@ export interface Hello {
 /** A payment request. Signed by the receiver (`to`), so nobody can redirect a payment. */
 export interface Invoice {
   type: typeof TYPE.INVOICE;
+  marketId: string;
+  /** 32 hex, random. The payer remembers paid invoiceIds and never pays one twice. */
+  invoiceId: string;
   to: PubKey;
   amount: Tinybar;
   memo: string;
@@ -256,7 +273,11 @@ export interface Invoice {
 export interface VerifyRequest {
   spend: Spend;
   proofs: InputProof[];
-  /** The reserve certificate. Always included: spends of non-genesis notes need it for rule 1. */
+  /**
+   * The reserve certificate. Always included: rule 1 checks it, and a genesis input's first note
+   * is derived from it. A phone pins the first certHash it accepts per reserveId and refuses any
+   * other certificate for that reserve.
+   */
   cert: ReserveCertificate;
 }
 
@@ -324,6 +345,7 @@ export const REASONS = {
   CERT_BAD_SIG: 'certificate not signed by settler and cosigner',
   CERT_WRONG_ROSTER: 'certificate is for a different roster',
   CERT_EXPIRED: 'certificate expired',
+  CERT_CONFLICT: 'a different certificate for this reserve was seen first',
   RESERVE_CLOSED: 'reserve closed',
   WRONG_RESERVE: 'note from a different reserve',
   UNKNOWN_NOTE: 'unknown note',

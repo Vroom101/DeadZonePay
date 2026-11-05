@@ -119,11 +119,14 @@ interface Spend {                 // a payment, signed by the owner of its input
 }
 
 type InputProof =
-  | { kind: 'genesis'; cert: ReserveCertificate }
+  | { kind: 'genesis' }                          // first note derived from the request's cert
   | { kind: 'approval'; approval: Approval };
 ```
 
-A `Spend` has no `from` field: the signer is the owner of its input notes, taken from the proofs.
+- A `Spend` has no `from` field: the signer is the owner of its input notes, taken from the proofs.
+- A genesis proof carries **no certificate of its own**. The first note is always derived from `VerifyRequest.cert`, the only certificate whose signatures rule 1 checks. A certificate inside the proof would let a payer mint money from an unsigned, forged certificate.
+- **One certificate per reserve, ever.** The backend never re-issues or edits a certificate for an existing `reserveId`. A longer validity means a new reserve. Each phone pins the first `certHash` it accepts for each `reserveId` and refuses any other (`a different certificate for this reserve was seen first`). Two valid certificates for one reserve would give two first notes, so the reserve could be spent twice.
+- **Exact fields.** Every signed object must have exactly the fields listed here; phase B validators reject unknown or missing fields. Signatures ignore top-level `sig`/`sigs`, so extra fields there would otherwise ride along unchecked.
 
 ### Acks and approvals
 
@@ -155,6 +158,7 @@ interface CloseRequest {          // published by the backend, signed by the set
   type: 'CLOSE_REQUEST';
   reserveId: string;
   marketId: string;
+  certHash: Hash;                 // signingHash of the reserve's certificate
   requestedAt: UnixSeconds;
   sig: Sig;
 }
@@ -164,6 +168,8 @@ interface Lock { noteId: Hash; spendHash: Hash }
 interface CloseAttestation {      // one phone's signed list of every lock it holds for one reserve
   type: 'CLOSED';
   reserveId: string;
+  marketId: string;
+  certHash: Hash;                 // signingHash of the reserve's certificate (no replay across markets or certificates)
   verifierId: VerifierId;
   locks: Lock[];
   spends: Spend[];                // the full spends the locks point to
@@ -181,25 +187,28 @@ interface SettlementPlan {
 }
 ```
 
-- After a phone signs a `CloseAttestation` for a reserve, it refuses every later spend from that reserve (`reserve closed`).
+- A phone answers a `CloseRequest` only if its sig verifies against `settlerPub` and its `certHash` equals the phone's pinned certHash for that reserve; the attestation carries that same certHash.
+- **Close is persist-before-reply.** In one transaction, the phone saves `closed = true` and the lock snapshot for the reserve. Only then does it sign and send its `CloseAttestation`. From then on it refuses every spend from that reserve (`reserve closed`), even after a crash and restart.
 - `settlementPlan(cert, roster, approvals, attestations)` (phase D) needs attestations from at least `threshold` distinct verifiers. It works as follows:
-  1. Start from the first note and apply valid approvals.
+  0. Ignore any attestation whose `marketId` or `certHash` doesn't match the certificate being settled, or whose signature or verifier is not in the roster.
+  1. First, across **all** valid uploaded approvals for this reserve (deduplicated by spendHash), check that no two different spends share an input note. If any do, safety is broken: settlement stops and nobody signs. This check doesn't depend on order. Then start from the first note and apply an approval only when all its inputs are currently unspent notes of this reserve, repeating until nothing more applies (dependency order).
   2. Pay every unspent note to its owner's `hederaAccount`.
-  3. **Hold** any unspent note that some attestation shows locked by a spend with no uploaded approval.
+  3. **Hold** an unspent note only if some attestation shows it locked by a spend with no uploaded approval **and** includes that spend, owner-signed, with `signingHash == lock.spendHash` and the note among its inputs. A lying verifier cannot freeze someone else's money; only a double-signing owner can get their own note stuck.
 - It always satisfies `sum(payouts) + sum(held) == cert.amount`.
-- The cosigner recomputes the plan from the same uploads and signs only if `planHash` matches.
+- The cosigner recomputes the plan from the same uploads and signs the **Hedera scheduled transfer** (ScheduleSign) only if `planHash` matches. It signs no app-level plan object; `planHash` travels as the schedule memo.
+- **Roster re-issue bumps `epoch`.** Votes bind `marketId` and `epoch`, so any new roster for the same market must use a new epoch.
 
 ## 4. Ack rules (every phone, in this order; the first failure is the refusal reason)
 
 | # | Rule | Refusal reasons |
 | --- | --- | --- |
 | 0 | Well-formed: `version == 'dzp.spend.v1'`; `marketId` is this roster's; 1–4 distinct inputs with one proof each (`proofs[i]` proves `inputs[i]`); 1–2 outputs; memo ≤ 140 | `malformed request`, `unsupported version`, `wrong market`, `a payment spends 1 to 4 notes`, `same note used twice`, `a payment has 1 or 2 outputs`, `memo too long` |
-| 1 | The certificate in the request is signed by settler and cosigner, is for this market and this roster, and is for `spend.reserveId`. It is not expired by **this phone's** clock (`now < expiresAt`), and the reserve is not closed on this phone. | `certificate not signed by settler and cosigner`, `wrong market`, `certificate is for a different roster`, `note from a different reserve`, `certificate expired`, `reserve closed` |
-| 2 | Every input note is real. A `genesis` proof's certificate gives a first note whose id equals the input. An `approval` proof is a valid approval (section 3) for a spend of the same reserve, and the input is one of its output note ids. | `unknown note`, `invalid approval proof`, `note from a different reserve` |
+| 1 | The certificate in the request is signed by settler and cosigner, is for this market and this roster, and is for `spend.reserveId`. Its `certHash` equals the one this phone pinned for that reserve, or none is pinned yet and this one gets pinned. It is not expired by **this phone's** clock (`now < expiresAt`), and the reserve is not closed on this phone. | `certificate not signed by settler and cosigner`, `wrong market`, `certificate is for a different roster`, `note from a different reserve`, `a different certificate for this reserve was seen first`, `certificate expired`, `reserve closed` |
+| 2 | Every input note is real. A `genesis` proof: the input equals `hash({type:'GENESIS', certHash})` of **the request's `cert`**, and the note's owner and amount come from that cert. An `approval` proof is a valid approval (section 3) for a spend of the same reserve, and the input is one of its output note ids. | `unknown note`, `invalid approval proof`, `note from a different reserve` |
 | 3 | All inputs have the same owner and the same reserve, and `spend.sig` verifies against that owner. | `inputs have different owners`, `note from a different reserve`, `bad signature` |
 | 4 | Every amount is a valid `Tinybar`; sum of inputs == sum of outputs exactly; every output owner is a roster participant. | `amount must be a positive whole number of tinybars`, `inputs do not equal outputs`, `receiver not registered` |
 | 5 | No input is locked to a **different** spendHash. If every input is unlocked or locked to this same spendHash, continue (a retry gets the same vote back). | `note already spent` |
-| 6 | Lock every input to this spendHash and **persist the locks before** signing and sending the vote. The closed check is repeated inside the same transaction. | `reserve closed` |
+| 6 | In **one transaction**: persist the certificate pin from rule 1 (if new) and lock every input to this spendHash. Only after it commits, sign and send the vote. The closed check and the pin check are repeated inside the same transaction. | `reserve closed`, `a different certificate for this reserve was seen first` |
 
 A refusal is sent as a signed `REFUSE`. A vote is deterministic (RFC 6979), so a retried request returns the identical `VOTE`.
 
@@ -220,9 +229,10 @@ interface Envelope<K extends MeshType = MeshType> {
 Delivery rules:
 - Send each message to every connected peer.
 - Keep the last 1,000 `msgId`s. Drop any you have seen. If an unseen message has `ttl > 1`, forward it once with `ttl - 1`.
-- `JSON.stringify(envelope)` must stay under 32 KB.
+- The UTF-8 length of `JSON.stringify(envelope)` must be strictly less than 32,768 bytes (`LIMITS.MAX_MESSAGE_BYTES`).
 - The envelope is **not** signed: everything that moves money is signed inside the body.
-- A new connection may send only `HELLO` until it has sent a valid one: signed, `pub` in `roster.verifiers`, `verifierId == verifierIdFromPub(pub)`. Otherwise disconnect.
+- A new connection may send only `HELLO` until it has sent a valid one: signed, this `marketId`, `pub` in `roster.verifiers`, `verifierId == verifierIdFromPub(pub)`. Otherwise disconnect. (A replayed HELLO can at most fake presence in the "connected" badge. It can't move money, because every vote and spend is signed.)
+- The payer remembers each paid `invoiceId` and never pays the same invoice twice.
 
 | Type | Sent by | Body | Signed by |
 | --- | --- | --- | --- |
@@ -235,8 +245,8 @@ Delivery rules:
 | `STATUS` | each phone every 3 s; drives the "4 of 4 connected" badge | `Status` | not signed (display only) |
 
 ```ts
-interface Hello { type: 'HELLO'; verifierId: VerifierId; pub: PubKey; name: string; ts: UnixSeconds; sig: Sig }
-interface Invoice { type: 'INVOICE'; to: PubKey; amount: Tinybar; memo: string; createdAt: UnixSeconds; sig: Sig }
+interface Hello { type: 'HELLO'; marketId: string; verifierId: VerifierId; pub: PubKey; name: string; ts: UnixSeconds; sig: Sig }
+interface Invoice { type: 'INVOICE'; marketId: string; invoiceId: string; to: PubKey; amount: Tinybar; memo: string; createdAt: UnixSeconds; sig: Sig }
 interface VerifyRequest { spend: Spend; proofs: InputProof[]; cert: ReserveCertificate }
 interface Refuse { type: 'REFUSE'; spendHash: Hash; verifierId: VerifierId; reason: string; sig: Sig }
 interface Status { verifierId: VerifierId; peers: VerifierId[]; ts: UnixSeconds }
@@ -247,7 +257,7 @@ Size check: a request spending 4 received notes carries 4 approvals (about 1.5 K
 
 ## 6. Refusal reasons (exact strings, `REASONS` in code)
 
-`malformed request` · `unsupported version` · `wrong market` · `certificate not signed by settler and cosigner` · `certificate is for a different roster` · `certificate expired` · `reserve closed` · `note from a different reserve` · `unknown note` · `invalid approval proof` · `inputs have different owners` · `bad signature` · `amount must be a positive whole number of tinybars` · `inputs do not equal outputs` · `a payment spends 1 to 4 notes` · `a payment has 1 or 2 outputs` · `same note used twice` · `receiver not registered` · `memo too long` · `note already spent`
+`malformed request` · `unsupported version` · `wrong market` · `certificate not signed by settler and cosigner` · `certificate is for a different roster` · `a different certificate for this reserve was seen first` · `certificate expired` · `reserve closed` · `note from a different reserve` · `unknown note` · `invalid approval proof` · `inputs have different owners` · `bad signature` · `amount must be a positive whole number of tinybars` · `inputs do not equal outputs` · `a payment spends 1 to 4 notes` · `a payment has 1 or 2 outputs` · `same note used twice` · `receiver not registered` · `memo too long` · `note already spent`
 
 ## 7. Limits (`LIMITS` in code)
 
@@ -293,6 +303,10 @@ These are additions or tightenings to the build plan's formats. All are already 
 2. **`INVOICE`, `REFUSE` and `HELLO` are signed.** An unsigned invoice could swap the receiver's key and redirect a payment. A signed refusal names the refusing phone truthfully on the verifier panel.
 3. **`verifierId` is derived from the pub** (`hash({type:'VERIFIER_ID', pub}).slice(0,16)`). P1 doesn't choose ids, and phones reject a roster whose ids don't match.
 4. **`threshold` is a `number` with the rule `2t − n ≥ 2`**, instead of the literal `3`. That gives 3 of 4, or 3 of 3 if only three phones are available; 2 of 4 is rejected.
-5. **`CloseRequest` shape** (new): `{ type: 'CLOSE_REQUEST', reserveId, marketId, requestedAt, sig }`, signed by the settler.
+5. **`CloseRequest` shape** (new): `{ type: 'CLOSE_REQUEST', reserveId, marketId, certHash, requestedAt, sig }`, signed by the settler. `CloseAttestation` also gains `marketId` and `certHash`, so an attestation can't be replayed from another market or certificate.
 6. **No "not yet valid" check on certificates.** Only `expiresAt` is checked, so a phone whose clock runs a few minutes behind doesn't refuse a fresh certificate.
 7. **Well-formedness is rule 0**, with its own reasons: version, market, input/output counts, duplicate inputs, memo length.
+8. **Genesis proof carries no certificate** (`{ kind: 'genesis' }`). The plan had `{kind:'genesis'; cert}`, which allowed minting from a forged certificate (found by the phase A review).
+9. **One certificate per reserveId, pinned by every phone.** P1 must never re-issue a certificate for an existing reserve.
+10. **`HELLO` and `INVOICE` carry `marketId`; `INVOICE` carries `invoiceId`.**
+11. **Strings with unpaired UTF-16 surrogates are rejected** by `canon()`, and so are getters and non-enumerable properties. Engines disagree on how to encode them.

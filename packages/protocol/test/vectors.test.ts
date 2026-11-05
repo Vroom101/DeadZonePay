@@ -29,6 +29,14 @@ describe('test vectors', () => {
     );
   });
 
+  it('an empty or truncated file fails instead of passing', () => {
+    const empty = { version: 'dzp.vectors.v1', note: '', keys: [], canon: [], signatures: [], hbar: [] } as VectorFile;
+    expect(checkVectors(empty).some((r) => !r.ok)).toBe(true);
+    const truncated = structuredClone(committed);
+    truncated.signatures.pop();
+    expect(checkVectors(truncated).filter((r) => !r.ok).map((r) => r.name)).toEqual(['vector file complete']);
+  });
+
   it('covers every signed message type', () => {
     const tags = new Set(
       committed.signatures.map((s) => String(s.object.version ?? s.object.type)),

@@ -80,6 +80,8 @@ export function buildVectors(): VectorFile {
   const vote = signedBy(chai, { type: TYPE.VOTE, spendHash, marketId: MARKET, epoch: 1, verifierId: chai.verifierId });
   const invoice = signedBy(chai, {
     type: TYPE.INVOICE,
+    marketId: MARKET,
+    invoiceId: 'c'.repeat(32),
     to: chai.pub,
     amount: hbarToTinybar('3').toString(),
     memo: 'chai',
@@ -87,6 +89,7 @@ export function buildVectors(): VectorFile {
   });
   const hello = signedBy(grocery, {
     type: TYPE.HELLO,
+    marketId: MARKET,
     verifierId: grocery.verifierId,
     pub: grocery.pub,
     name: 'Grocery',
@@ -102,11 +105,14 @@ export function buildVectors(): VectorFile {
     type: TYPE.CLOSE_REQUEST,
     reserveId: cert.reserveId,
     marketId: MARKET,
+    certHash,
     requestedAt: T0 + 7_200,
   });
   const attestation = signedBy(veg, {
     type: TYPE.CLOSED,
     reserveId: cert.reserveId,
+    marketId: MARKET,
+    certHash,
     verifierId: veg.verifierId,
     locks: [{ noteId: genesisId, spendHash }],
     spends: [spend],

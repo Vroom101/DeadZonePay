@@ -60,8 +60,41 @@ function check(name: string, fn: () => string | true): VectorResult {
   }
 }
 
+/** Vectors every complete file must contain; a truncated or empty file must fail, not pass. */
+export const REQUIRED_VECTORS = {
+  keys: ['settler', 'cosigner', 'customer', 'chai', 'grocery', 'veg'],
+  signatures: [
+    'roster (settler)',
+    'roster (cosigner)',
+    'reserve certificate (settler)',
+    'reserve certificate (cosigner)',
+    'spend',
+    'vote',
+    'invoice',
+    'hello',
+    'refuse',
+    'close request',
+    'close attestation',
+  ],
+  canon: ['genesis note id', 'output note id 0', 'output note id 1', 'verifier id preimage'],
+} as const;
+
 export function checkVectors(file: VectorFile): VectorResult[] {
   const results: VectorResult[] = [];
+  const complete = check('vector file complete', () => {
+    if (file?.version !== 'dzp.vectors.v1') return 'wrong or missing version';
+    const missingFrom = (list: { name?: string; label?: string }[] | undefined, names: readonly string[]) =>
+      names.filter((n) => !(list ?? []).some((x) => (x.name ?? x.label) === n));
+    const missing = [
+      ...missingFrom(file.keys, REQUIRED_VECTORS.keys),
+      ...missingFrom(file.signatures, REQUIRED_VECTORS.signatures),
+      ...missingFrom(file.canon, REQUIRED_VECTORS.canon),
+    ];
+    if (!file.hbar || file.hbar.length === 0) missing.push('hbar');
+    return missing.length === 0 ? true : `missing: ${missing.join(', ')}`;
+  });
+  results.push(complete);
+  if (!complete.ok) return results;
   const keys = new Map(file.keys.map((k) => [k.label, k]));
 
   for (const k of file.keys) {
